@@ -3,6 +3,7 @@
  */
 // 存储数据
 export const setItem = (key, value) => {
+  // 注意：本地存储只能存字符串
   // 如果value是对象类型或数组类型, 则需要将value转化为json格式的字符串
   if (typeof value === 'object') {
     value = JSON.stringify(value)

@@ -1,7 +1,12 @@
 <template>
   <div class="login-container">
     <!-- NavBar导航栏组件 -->
-    <van-nav-bar class="page-nav-bar" title="登录" />
+    <van-nav-bar class="page-nav-bar"  title="登录">
+      <!-- NavBar导航栏组件提供了Slots插槽 。slot="left"表示自定义导航栏左侧图标 -->
+      <!-- <i slot="left" class="toutiao toutiao-guanbi"  @click="$router.back()"></i> -->
+      <!-- 使用Icon图标组件自带的图标 -->
+      <van-icon slot="left" name="cross" @click="$router.back()"/>
+    </van-nav-bar>
     <!-- Form表单组件 -->
     <van-form @submit="onSubmit" ref="loginFormRef">
       <!-- Field输入框组件 -->
@@ -86,6 +91,9 @@ export default {
         // 将refresh_token和token存储到vuex中
         this.$store.commit('setUser', res.data)
         this.$toast.success('登录成功')
+        // 登录成功后 跳转到原来页面
+        // back的方式不严谨，后面讲功能优化的时候再说
+        this.$router.back()
       } catch (err) {
         if (err.response.status === 400) {
           this.$toast.fail('手机号或验证码错误')
