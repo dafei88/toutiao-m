@@ -21,3 +21,10 @@ export const getUserInfo = () => {
     url: '/v1_0/user'
   })
 }
+// 获取用户的频道列表
+export const getUserChannels = () => {
+  return request({
+    method: 'GET',
+    url: '/v1_0/user/channels'
+  })
+}
