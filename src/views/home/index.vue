@@ -13,34 +13,45 @@
     <van-tabs class="channel-tabs" v-model="active" animated swipeable>
       <van-tab :title="item.name" v-for="item in channels" :key="item.id">
         <!-- 文章列表 -->
-        <article-list :channel="item">文章列表组件</article-list>
+        <article-list :channel="item"></article-list>
       </van-tab>
       <!-- Tabs标签页组件提供了Slots插槽，slot="nav-right"  仅用作占位符-->
       <div slot="nav-right" class="placeholder"></div>
       <!-- Tabs标签页组件提供了Slots插槽，slot="nav-right" 自定义了标题右侧内容-->
-      <div slot="nav-right" class="hambuger-btn">
+      <div slot="nav-right" class="hambuger-btn" @click="isChannelEditShow = true">
         <i class="toutiao toutiao-liebiao"></i>
       </div>
     </van-tabs>
+    <!-- Popup -->
+    <van-popup v-model="isChannelEditShow" closeable close-icon-position="top-left" position="bottom" :style="{ height: '100%' }">
+      <channel-edit :my-channels="channels" :active-index="active" @update-active="onUpdateActive" @add-my-channel="addMyChannel" @delete-my-channel="deleteMyChannel"></channel-edit>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/user'
 import ArticleList from '@/views/home/components/article-list.vue'
+import ChannelEdit from '@/views/home/components/channel-edit.vue'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage.js'
 export default {
   name: 'HomeIndex',
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   },
   props: {},
   data() {
     return {
       active: 0,
-      channels: [] // 频道列表
+      channels: [], // 频道列表
+      isChannelEditShow: false
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['user'])
+  },
   watch: {},
   created() {
     this.loadChannels()
@@ -49,12 +60,38 @@ export default {
   methods: {
     async loadChannels() {
       try {
-        const { data: res } = await getUserChannels()
-        this.channels = res.data.channels
-        console.log('频道列表', res.data.channels)
+        let channels = []
+        if (this.user) {
+          // 已登录， 请求获取用户的频道列表
+          const { data: res } = await getUserChannels()
+          channels = res.data.channels
+        } else {
+          // 未登录，判断是否有本地的频道列表数据  如果有，直接拿来使用；如果没有，请求获取默认频道列表。
+          // 注意：获取登录用户的频道列表和获取默认推荐的频道列表（用户未登录 且本地没有存储频道列表时，后端提供的一个默认推荐的频道列表）是同一个数据接口
+          const loadChannels = getItem('TOUTIAO_CHANNELS')
+          if (loadChannels) {
+            channels = loadChannels
+          } else {
+            const { data: res } = await getUserChannels()
+            channels = res.data.channels
+          }
+        }
+        this.channels = channels
       } catch (error) {
         this.$toast('获取频道列表失败')
       }
+    },
+    // isChannelEditShow = true 作为第二个参数。如果有传值过来，用传过来的值 把该值赋值给isChannelEditShow；如果没有传值过来，则用isChannelEditShow = true
+    onUpdateActive(value, isChannelEditShow = true) {
+      console.log('子组件传过来的值', value)
+      this.isChannelEditShow = isChannelEditShow
+      this.active = value
+    },
+    addMyChannel(channel) {
+      this.channels.push(channel)
+    },
+    deleteMyChannel(index) {
+      this.channels.splice(index, 1)
     }
   }
 }
