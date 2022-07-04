@@ -5,7 +5,7 @@
     <van-nav-bar class="page-nav-bar" fixed>
       <!-- NavBar导航栏提供了Slots插槽 slot="title" 自定义标题-->
       <!-- Button按钮组件 通过icon属性设置按钮图标，支持 Icon 组件里的所有图标，也可以传入图标 URL。-->
-      <van-button class="search-btn" slot="title" icon="search" size="mini" type="info" round>搜索</van-button>
+      <van-button class="search-btn" slot="title" icon="search" size="mini" type="info" round to="/search">搜索</van-button>
     </van-nav-bar>
     <!-- Tab标签页组件 通过v-model绑定当前激活标签对应的索引值，默认情况下启用第一个标签 -->
     <!-- 通过 animated 属性可以开启切换标签内容时的转场动画 -->

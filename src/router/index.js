@@ -11,6 +11,12 @@ const routes = [
     component: () => import('@/views/login/index')
   },
   {
+    path: '/search',
+    name: 'search',
+    // 路由懒加载
+    component: () => import('@/views/search/index')
+  },
+  {
     path: '/',
     name: 'layout',
     redirect: '/home',
