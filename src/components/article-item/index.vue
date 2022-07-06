@@ -1,6 +1,26 @@
 <template>
   <!-- Cell单元格组件 -->
-  <van-cell class="article-item">
+  <!-- 这里提供了三种路由方法： -->
+  <!-- :to="'/article/'+article.art_id" -->
+  <!-- :to="`/article/${article.art_id}`" -->
+  <!-- :to="{
+      name: 'article',
+      params: {
+        articleId: article.art_id
+      }
+    }" -->
+  <van-cell
+    class="article-item"
+    :to="{
+      // 根据路由名称进行跳转
+      name: 'article',
+      // 传递路由动态参数
+      params: {
+        // 属性名:路由路径中设计的动态参数名称
+        articleId: article.art_id
+      }
+    }"
+  >
     <!-- Cell单元格组件提供了Slots插槽，slot="title"自定义左侧 title 的内容; slot="label"自定义标题下方 label 的内容; slot="default"自定义右侧 value 的内容-->
     <!-- Style内置样式组件 van-multi-ellipsis--l2表示最多显示两行 -->
     <div slot="title" class="title van-multi-ellipsis--l2">{{ article.title }}</div>

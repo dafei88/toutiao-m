@@ -3,10 +3,21 @@
 */
 import axios from 'axios'
 import store from '@/store/index'
+// JSONBig可以处理超出JavaScript安全整数范围的问题
+import JSONBig from 'json-bigint'
 // axios.create(config)根据指定配置创建一个新的axios
 const request = axios.create({
   // 接口的基准路径
-  baseURL: 'api'
+  baseURL: 'api',
+  // 自定义处理后端返回的原始数据
+  transformResponse: [function (data) {
+    try {
+      // 会自动把响应数据data中的超出JavaScript安全整数范围的数据转化为BigNumber类型的对象
+      return JSONBig.parse(data)
+    } catch (error) {
+      return data
+    }
+  }]
 })
 // 请求拦截器
 request.interceptors.request.use(function (config) {

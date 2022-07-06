@@ -16,7 +16,9 @@ module.exports = {
             },
             // 配置要转换的CSS属性
             // *表示所有
-            propList: ['*']
+            propList: ['*'],
+            // 不进行px到rem转换的样式文件
+            exclude: 'github-markdown'
         },
     },
 };

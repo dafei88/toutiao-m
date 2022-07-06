@@ -17,6 +17,14 @@ const routes = [
     component: () => import('@/views/search/index')
   },
   {
+    path: '/article/:articleId',
+    name: 'article',
+    // 路由懒加载
+    component: () => import('@/views/article/index'),
+    // 开启Props传参，也就是把路由参数映射到组件的props对象中
+    props: true
+  },
+  {
     path: '/',
     name: 'layout',
     redirect: '/home',
