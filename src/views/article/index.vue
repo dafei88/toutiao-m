@@ -26,15 +26,18 @@
           <!-- $event是子组件传来的参数 -->
           <follow-user v-model="article.is_followed" :aut-id="article.aut_id"></follow-user>
         </van-cell>
-        <!-- 用户信息 -->
+        <!-- /用户信息 -->
 
         <!-- 文章内容 -->
         <div class="article-content markdown-body" v-html="article.content" ref="article-content"></div>
         <van-divider>正文结束</van-divider>
+        <!-- 文章评论列表 -->
+        <comment-list @reply-click="onReplyClick" @update-list="updateCommentList" :list="commentList" :source="article.art_id" @onload-success="totalCommentCount = $event.total_count"></comment-list>
         <!-- 底部区域 -->
         <div class="article-bottom">
-          <van-button class="comment-btn" type="default" round size="small">写评论</van-button>
-          <van-icon name="comment-o" info="123" color="#777" />
+          <van-button class="comment-btn" type="default" round size="small" @click="isPostShow = true">写评论</van-button>
+          <!-- Icon图标组件 设置 badge 属性后，会在图标右上角展示相应的徽标 -->
+          <van-icon name="comment-o" :badge="this.totalCommentCount" color="#777" />
           <collect-article v-model="article.is_collected" :art-id="article.art_id"></collect-article>
           <like-article v-model="article.attitude" :art-id="article.art_id"></like-article>
           <van-icon name="share" color="#777777"></van-icon>
@@ -58,6 +61,23 @@
       </div>
       <!-- /加载失败：其它未知错误（例如网络原因或服务端异常） -->
     </div>
+    <!-- 对文章评论的的弹层 -->
+    <!-- Popup弹出层 -->
+    <!-- 弹出层是懒渲染的：只有在第一次展示的时候才会渲染里面的内容 -->
+    <van-popup v-model="isPostShow" position="bottom">
+      <comment-post :target="article.art_id" @post-success="onPostSuccess"></comment-post>
+    </van-popup>
+    <!-- 对评论回复的弹层 -->
+    <van-popup v-model="isReplyShow" style="height: 100%" position="bottom">
+      <!-- v-if等于ture时 渲染元素（或组件）   v-if等于false时 移除元素（或组件） 这样就会使得你每次点击评论的回复按钮时 弹层的内容(也就是CommentList组件）就会被重新加载渲染 -->
+      <comment-reply
+        v-if="isReplyShow"
+        :comment="currentComment"
+        @close="isReplyShow = false"
+        @update-is-liking="currentComment.is_liking = $event"
+        @update-reply-count="updateReplyCount"
+      ></comment-reply>
+    </van-popup>
   </div>
 </template>
 
@@ -68,12 +88,18 @@ import { ImagePreview } from 'vant'
 import followUser from '@/components/follow-user/index.vue'
 import CollectArticle from '@/components/collect-article/index.vue'
 import LikeArticle from '@/components/like-article/index.vue'
+import CommentList from '@/views/article/components/article-comment.vue'
+import CommentPost from '@/views/article/components/comment-post.vue'
+import CommentReply from '@/views/article/components/comment-reply.vue'
 export default {
   name: 'ArticleIndex',
   components: {
     followUser,
     CollectArticle,
-    LikeArticle
+    LikeArticle,
+    CommentList,
+    CommentPost,
+    CommentReply
   },
   props: {
     articleId: {
@@ -84,11 +110,23 @@ export default {
       required: true
     }
   },
+  // 给所有的后代组件提供数据
+  provide: function () {
+    return {
+      articleId: this.articleId
+    }
+  },
   data() {
     return {
       article: {},
       loading: true, // 加载中
-      errStatus: 0
+      errStatus: 0,
+      totalCommentCount: 0,
+      isPostShow: false,
+      // 定义commentList数组类型的变量，是为了获取子组件CommentList的评论列表  这样做的原因：我们需要在本组件（也就是CommentList的父组件）操作CommentList的评论列表。比如添加评论
+      commentList: [],
+      isReplyShow: false,
+      currentComment: {}
     }
   },
   computed: {},
@@ -145,6 +183,24 @@ export default {
         }
       })
       console.log('文章中所有图片的url地址', images)
+    },
+    onPostSuccess(obj) {
+      // 关闭弹层
+      this.isPostShow = false
+      // 将发布内容放到评论列表顶部
+      this.commentList.unshift(obj.new_obj)
+    },
+    updateCommentList(results) {
+      this.commentList.push(...results)
+    },
+    onReplyClick(comment) {
+      console.log(comment)
+      // 显示对评论回复的弹出层
+      this.isReplyShow = true
+      this.currentComment = comment
+    },
+    updateReplyCount(val) {
+      this.currentComment.reply_count++
     }
   }
 }
