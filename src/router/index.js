@@ -25,6 +25,12 @@ const routes = [
     props: true
   },
   {
+    path: '/user/profile',
+    name: 'user-profile',
+    // 路由懒加载
+    component: () => import('@/views/user-profile')
+  },
+  {
     path: '/',
     name: 'layout',
     redirect: '/home',
